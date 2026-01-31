@@ -7,12 +7,19 @@ type Todo = {
   text: string;
 };
 
+type HealthResponse = {
+  status: string;
+  timestamp: string;
+  storage?: string;
+};
+
 const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function HomePage() {
   const [health, setHealth] = useState<"checking" | "ok" | "error">(
     "checking"
   );
+  const [storage, setStorage] = useState<string | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,9 +29,12 @@ export default function HomePage() {
       setError(null);
       const res = await fetch(`${apiBase}/api/health`, { cache: "no-store" });
       if (!res.ok) throw new Error("Health check failed");
+      const data = (await res.json()) as HealthResponse;
       setHealth("ok");
+      setStorage(data.storage ?? null);
     } catch (err) {
       setHealth("error");
+      setStorage(null);
       setError("No se pudo conectar con el backend");
     }
   };
@@ -79,6 +89,12 @@ export default function HomePage() {
             {health === "error" && "Sin conexión"}
           </span>
         </div>
+        <p>
+          DB:{" "}
+          <strong>
+            {health === "ok" ? storage ?? "desconocida" : "sin datos"}
+          </strong>
+        </p>
         {error && <p className="error">{error}</p>}
       </section>
 
