@@ -11,6 +11,7 @@ type HealthResponse = {
   status: string;
   timestamp: string;
   storage?: string;
+  runtime?: string;
 };
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
@@ -20,6 +21,7 @@ export default function HomePage() {
     "checking"
   );
   const [storage, setStorage] = useState<string | null>(null);
+  const [runtime, setRuntime] = useState<string | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -32,9 +34,11 @@ export default function HomePage() {
       const data = (await res.json()) as HealthResponse;
       setHealth("ok");
       setStorage(data.storage ?? null);
+      setRuntime(data.runtime ?? null);
     } catch (err) {
       setHealth("error");
       setStorage(null);
+      setRuntime(null);
       setError("No se pudo conectar con el backend");
     }
   };
@@ -93,6 +97,12 @@ export default function HomePage() {
           DB:{" "}
           <strong>
             {health === "ok" ? storage ?? "desconocida" : "sin datos"}
+          </strong>
+        </p>
+        <p>
+          Runtime:{" "}
+          <strong>
+            {health === "ok" ? runtime ?? "desconocido" : "sin datos"}
           </strong>
         </p>
         {error && <p className="error">{error}</p>}
